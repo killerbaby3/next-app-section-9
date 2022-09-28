@@ -1,9 +1,19 @@
 import classes from './comment-list.module.css';
 
-function CommentList() {
+function CommentList(props) {
+  const { items } = props;
   return (
     <ul className={classes.comments}>
-      {/* Render list of comments - fetched from API */}
+      {
+        items.map((c) => (
+          <li key={c.id}>
+            <p>{c.text}</p>
+            <div>
+              By <address>{c.name}</address>
+            </div>
+          </li>
+        ))
+      }
       <li>
         <p>My comment is amazing!</p>
         <div>
