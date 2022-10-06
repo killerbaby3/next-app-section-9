@@ -1,6 +1,7 @@
-export default function handler(req, res) {
+import { MongoClient } from "mongodb";
+
+async function handler(req, res) {
   if (req.method === "POST") {
-    console.log(1111);
     const userEmail = req.body.email;
     if (!userEmail || !userEmail.includes("@")) {
       res.status(422).json({
@@ -8,9 +9,20 @@ export default function handler(req, res) {
       });
       return;
     }
-    console.log(userEmail);
+
+    const client = await MongoClient.connect(
+      "mongodb+srv://datvt:DaSYFW46xmyXgjND@cluster0.4ldkwfy.mongodb.net/newsletter?retryWrites=true&w=majority"
+    );
+    const db = client.db();
+
+    await db.collection("emails").insertOne({ email: userEmail });
+
+    client.close();
+    console.log('okeeeee---->',userEmail);
     res.status(201).json({ message: "Signed up!" });
   } else {
     console.log(22222);
   }
 }
+
+export default handler;
