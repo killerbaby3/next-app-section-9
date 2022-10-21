@@ -1,27 +1,32 @@
-import { MongoClient } from "mongodb";
+import { connectDatabase, insertDocument } from '../../helpers/db-util';
 
 async function handler(req, res) {
-  if (req.method === "POST") {
+  if (req.method === 'POST') {
     const userEmail = req.body.email;
-    if (!userEmail || !userEmail.includes("@")) {
-      res.status(422).json({
-        message: "Invalid email address !",
-      });
+
+    if (!userEmail || !userEmail.includes('@')) {
+      res.status(422).json({ message: 'Invalid email address.' });
       return;
     }
 
-    const client = await MongoClient.connect(
-      "mongodb+srv://datvt:DaSYFW46xmyXgjND@cluster0.4ldkwfy.mongodb.net/newsletter?retryWrites=true&w=majority"
-    );
-    const db = client.db();
+    let client;
 
-    await db.collection("emails").insertOne({ email: userEmail });
+    try {
+      client = await connectDatabase();
+    } catch (error) {
+      res.status(500).json({ message: 'Connecting to the database failed!' });
+      return;
+    }
 
-    client.close();
-    console.log('okeeeee---->',userEmail);
-    res.status(201).json({ message: "Signed up!" });
-  } else {
-    console.log(22222);
+    try {
+      await insertDocument(client, 'newsletter', { email: userEmail });
+      client.close();
+    } catch (error) {
+      res.status(500).json({ message: 'Inserting data failed!' });
+      return;
+    }
+
+    res.status(201).json({ message: 'Signed up!' });
   }
 }
 
